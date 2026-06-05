@@ -230,6 +230,8 @@ int main(void)
 /* ------------------------------------------------------------------ */
 void bridge_assert_failed(const char *file, int line)
 {
+    (void)file;
+    (void)line;
     taskDISABLE_INTERRUPTS();
     /* Log file/line over debug UART, then blink LED in infinite loop */
     for (;;) {
