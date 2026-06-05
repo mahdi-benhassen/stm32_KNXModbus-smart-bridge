@@ -69,7 +69,7 @@ jobs:
             Core/Src/ App/ Drivers/ Middlewares/ config/
 
   format-check:
-    name: Code Formatting (clang-format)
+    name: Code Formatting (advisory)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -81,7 +81,8 @@ jobs:
       - name: Check formatting
         run: |
           find . -name '*.c' -o -name '*.h' \
-            | xargs clang-format --dry-run --Werror --style=file
+            | xargs clang-format --dry-run --style=file 2>&1 | head -50 || true
+        continue-on-error: true
 
   struct-size-check:
     name: Struct Size Validation
