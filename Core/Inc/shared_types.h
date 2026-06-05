@@ -18,6 +18,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "project_config.h"
 
 /* ------------------------------------------------------------------ */
 /*  Basic Value Types (KNX <-> Modbus representations)                  */

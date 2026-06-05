@@ -28,7 +28,7 @@ jobs:
       - name: Verify all C sources compile
         run: |
           set -e
-          INCS="-I Core/Inc -I config -I Drivers/BSP/knx_tpuart -I Drivers/BSP/modbus_rs485 -I Drivers/BSP/eeprom -I App/DataBroker -I App/LogicEngine -I App/VirtualHolder -I Middlewares/KNX/Stack -I Middlewares/KNX/ETS -I Middlewares/Modbus/Stack -I Middlewares/Modbus/ClientServer"
+          INCS="-I test/stubs -I Core/Inc -I config -I Drivers/BSP/knx_tpuart -I Drivers/BSP/modbus_rs485 -I Drivers/BSP/eeprom -I App/DataBroker -I App/LogicEngine -I App/VirtualHolder -I Middlewares/KNX/Stack -I Middlewares/KNX/ETS -I Middlewares/Modbus/Stack -I Middlewares/Modbus/ClientServer"
           FLAGS="-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32F407xx -O2 -Wall -Wextra -Werror -fsyntax-only"
           SOURCES="Core/Src/main.c Core/Src/diag_task.c Drivers/BSP/knx_tpuart/knx_tpuart.c Drivers/BSP/modbus_rs485/modbus_rs485.c Drivers/BSP/eeprom/nvram.c App/DataBroker/data_broker.c App/DataBroker/mapping_table.c App/LogicEngine/logic_blocks.c App/LogicEngine/pi_controller.c App/LogicEngine/dew_point.c App/VirtualHolder/virtual_holder.c"
           arm-none-eabi-gcc $INCS $FLAGS $SOURCES 2>&1
@@ -53,6 +53,7 @@ jobs:
             --suppress=unusedFunction \
             --inline-suppr \
             --error-exitcode=0 \
+            -I test/stubs \
             -I Core/Inc \
             -I config \
             -I Drivers/BSP/knx_tpuart \
@@ -103,7 +104,7 @@ jobs:
           EOF
           arm-none-eabi-gcc -fsyntax-only \
             -mcpu=cortex-m4 -mthumb \
-            -I Core/Inc -I config \
+            -I test/stubs -I Core/Inc -I config \
             -DSTM32F407xx \
             /tmp/check.c
           echo "Static asserts OK."
