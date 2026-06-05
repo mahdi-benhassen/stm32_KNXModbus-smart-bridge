@@ -166,12 +166,14 @@ typedef struct {
     uint32_t OscillatorType;
     uint32_t HSEState;
     uint32_t HSIState;
-    uint32_t PLLState;
-    uint32_t PLLSource;
-    uint32_t PLLM;
-    uint32_t PLLN;
-    uint32_t PLLP;
-    uint32_t PLLQ;
+    struct {
+        uint32_t PLLState;
+        uint32_t PLLSource;
+        uint32_t PLLM;
+        uint32_t PLLN;
+        uint32_t PLLP;
+        uint32_t PLLQ;
+    } PLL;
 } RCC_OscInitTypeDef;
 
 typedef struct {
