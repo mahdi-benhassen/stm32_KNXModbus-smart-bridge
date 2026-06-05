@@ -1,0 +1,113 @@
+name: CI — Build & Static Analysis
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  build:
+    name: Build (arm-none-eabi-gcc)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ARM toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.2.Rel1'
+
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+
+      - name: Configure CMake
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DENABLE_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Print size info
+        run: arm-none-eabi-size build/*.elf
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.build_type }}
+          path: |
+            build/*.bin
+            build/*.elf
+            build/*.hex
+          if-no-files-found: error
+
+  static-analysis:
+    name: MISRA C 2012 (cppcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck (MISRA addon)
+        run: |
+          cppcheck \
+            --enable=all \
+            --addon=misra \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            --inline-suppr \
+            --error-exitcode=1 \
+            -I Core/Inc \
+            -I config \
+            Core/Src/ App/ Drivers/ Middlewares/ config/
+        continue-on-error: true
+
+  format-check:
+    name: Code Formatting (clang-format)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          find . -name '*.c' -o -name '*.h' \
+            | xargs clang-format --dry-run --Werror --style=file
+        continue-on-error: true
+
+  eeprom-layout-check:
+    name: Struct Size Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify static asserts compile
+        run: |
+          echo '#include "shared_types.h"
+          #include "eeprom_layout.h"
+          int main(void) { return 0; }' > /tmp/check.c
+          arm-none-eabi-gcc -fsyntax-only \
+            -I Core/Inc -I config \
+            -DSTM32F407xx \
+            /tmp/check.c

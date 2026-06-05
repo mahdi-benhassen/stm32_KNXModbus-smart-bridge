@@ -1,0 +1,44 @@
+# === Toolchain artifacts ===
+*.o
+*.d
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+*.su
+build/
+cmake-build-*/
+
+# === STM32CubeMX / IDE ===
+*.bak
+*.orig
+*.ioc.bak
+*.mxproject
+.settings/
+Debug/
+Release/
+.project
+.cproject
+*.launch
+
+# === OS clutter ===
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*~
+
+# === Python / scripts (if any) ===
+__pycache__/
+*.pyc
+
+# === Dependencies (if vendored) ===
+Drivers/CMSIS/
+Middlewares/FreeRTOS/
+Drivers/STM32F4xx_HAL_Driver/
+
+# === Secrets & local config ===
+*.secret
+*.key
+secrets.h
